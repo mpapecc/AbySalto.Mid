@@ -1,5 +1,10 @@
+using System.Text;
 using AbySalto.Mid.Application;
 using AbySalto.Mid.Infrastructure;
+using AbySalto.Mid.Infrastructure.ConfigurationOptions;
+using AbySalto.Mid.WebApi.Middlewares;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AbySalto.Mid
 {
@@ -8,6 +13,7 @@ namespace AbySalto.Mid
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddHttpContextAccessor();
 
             builder.Services
                 .AddPresentation()
@@ -17,6 +23,8 @@ namespace AbySalto.Mid
             builder.Services.AddExceptionHandler<ExceptionHandler>();
             builder.Services.AddProblemDetails();
             builder.Services.AddOpenApi();
+            builder.Services.AddMemoryCache();
+
             var JwtOptions = new JwtOptions();
             builder.Configuration.GetSection("JwtOptions").Bind(JwtOptions);
 
@@ -54,7 +62,6 @@ namespace AbySalto.Mid
 
             app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 
