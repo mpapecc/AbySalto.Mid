@@ -1,5 +1,15 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using AbySalto.Mid.Application.Interfaces.Auth;
+using AbySalto.Mid.Application.Interfaces.Repositories;
+using AbySalto.Mid.Domain.Entites;
+using AbySalto.Mid.Infrastructure.Auth;
+using AbySalto.Mid.Infrastructure.ConfigurationOptions;
+using AbySalto.Mid.Infrastructure.Database;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace AbySalto.Mid.Infrastructure
 {
@@ -9,6 +19,18 @@ namespace AbySalto.Mid.Infrastructure
         {
             services.Configure<DummyJsonOptions>(configuration.GetSection(nameof(DummyJsonOptions)));
             services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
+
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+            services.AddScoped<IUserIdentity,UserIdentity>(x =>
+            {
+                var httpContext = x.GetRequiredService<IHttpContextAccessor>();
+                var userRepository = x.GetRequiredService<IRepository<User>>();
+                var userIdClaim = httpContext.HttpContext.User.Claims.FirstOrDefault(x => x.Type == "UserId");
+
+                return userIdClaim != null ? new UserIdentity(int.Parse(userIdClaim.Value), userRepository) : new UserIdentity();
+            });
+
             return services.AddDatabase(configuration).AddHttpClients().AddServices();
         }
 
