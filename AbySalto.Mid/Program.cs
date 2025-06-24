@@ -14,10 +14,30 @@ namespace AbySalto.Mid
                 .AddApplication()
                 .AddInfrastructure(builder.Configuration);
 
-            builder.Services.AddControllers();
+            builder.Services.AddExceptionHandler<ExceptionHandler>();
+            builder.Services.AddProblemDetails();
             builder.Services.AddOpenApi();
+            var JwtOptions = new JwtOptions();
+            builder.Configuration.GetSection("JwtOptions").Bind(JwtOptions);
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(o =>
+                {
+                     o.TokenValidationParameters = new TokenValidationParameters
+                     {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtOptions.Secret)),
+                        ValidIssuer = JwtOptions.Issuer,
+                        ValidAudience = JwtOptions.Audience,
+                        ClockSkew = TimeSpan.Zero,
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true
+                    };
+                });
 
             var app = builder.Build();
+            app.UseExceptionHandler();
 
             if (app.Environment.IsDevelopment())
             {
@@ -32,6 +52,7 @@ namespace AbySalto.Mid
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
 

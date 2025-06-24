@@ -7,7 +7,9 @@ namespace AbySalto.Mid.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            return services;
+            services.Configure<DummyJsonOptions>(configuration.GetSection(nameof(DummyJsonOptions)));
+            services.Configure<JwtOptions>(configuration.GetSection(nameof(JwtOptions)));
+            return services.AddDatabase(configuration).AddHttpClients().AddServices();
         }
 
         private static IServiceCollection AddServices(this IServiceCollection services)
@@ -17,6 +19,24 @@ namespace AbySalto.Mid.Infrastructure
 
         private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddDbContext<AbySaltoDb>(o =>
+            {
+                o.UseSqlServer(configuration.GetConnectionString("Default"));
+            });
+
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+            return services;
+        }
+
+        private static IServiceCollection AddHttpClients(this IServiceCollection services)
+        {
+            services.AddHttpClient("DummyJsonClient", (serviceProvider, client) =>
+            {
+                var settings = serviceProvider.GetRequiredService<IOptions<DummyJsonOptions>>().Value;
+                client.BaseAddress = new Uri(settings.BaseAddress);
+            });
+
             return services;
         }
     }
