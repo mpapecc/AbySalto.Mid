@@ -9,6 +9,7 @@ namespace AbySalto.Mid.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IBasketService, BasketService>();
             return services;
         }
     }
