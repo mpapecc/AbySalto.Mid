@@ -7,6 +7,7 @@ using AbySalto.Mid.Infrastructure.Database;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -25,10 +26,11 @@ namespace AbySalto.Mid.Infrastructure
             services.AddScoped<IUserIdentity,UserIdentity>(x =>
             {
                 var httpContext = x.GetRequiredService<IHttpContextAccessor>();
+                var cache = x.GetRequiredService<IMemoryCache>();
                 var userRepository = x.GetRequiredService<IRepository<User>>();
                 var userIdClaim = httpContext.HttpContext.User.Claims.FirstOrDefault(x => x.Type == "UserId");
 
-                return userIdClaim != null ? new UserIdentity(int.Parse(userIdClaim.Value), userRepository) : new UserIdentity();
+                return userIdClaim != null ? new UserIdentity(int.Parse(userIdClaim.Value), userRepository, cache) : new UserIdentity();
             });
 
             return services.AddDatabase(configuration).AddHttpClients().AddServices();
