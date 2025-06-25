@@ -10,6 +10,7 @@ namespace AbySalto.Mid.Application
         {
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IBasketService, BasketService>();
+            services.AddScoped(typeof(IGridProcessor<>), typeof(GridProcessor<>));
             return services;
         }
     }

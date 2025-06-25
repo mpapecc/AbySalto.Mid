@@ -5,6 +5,7 @@ using AbySalto.Mid.Application.Models.Product;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using AbySalto.Mid.Application.Interfaces;
+using AbySalto.Mid.Application.Models.GridProcessors;
 
 namespace AbySalto.Mid.Controllers
 {
@@ -13,16 +14,19 @@ namespace AbySalto.Mid.Controllers
     public class ProductController : Controller
     {
         private readonly IProductService productService;
+        private readonly IGridProcessor<Product> gridProcessor;
 
-        public ProductController(IProductService productService)
+        public ProductController(IProductService productService, IGridProcessor<Product> gridProcessor)
         {
             this.productService = productService;
+            this.gridProcessor = gridProcessor;
         }
 
-        [HttpGet(nameof(GetAllProducts))]
-        public async Task<ProductsResponse?> GetAllProducts()
+        [HttpPost(nameof(GetAllProducts))]
+        public async Task<IEnumerable<Product>?> GetAllProducts(GridRquest gridRquest)
         {
-            return await this.productService.GetAllProducts();
+            return this.gridProcessor.ProcessQuery((await this.productService.GetAllProducts()).Products.AsQueryable(), gridRquest);
+
         }
 
         [HttpGet(nameof(GetProduct))]

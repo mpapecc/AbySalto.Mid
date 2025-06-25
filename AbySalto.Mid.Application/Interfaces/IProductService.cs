@@ -5,7 +5,7 @@ namespace AbySalto.Mid.Application.Interfaces
     public interface IProductService
     {
         Task<ProductsResponse?> GetAllProducts();
-        Task<Product?> GetProduct(int id);
+        Task<ProductDetails?> GetProduct(int id);
         Task<IEnumerable<Product>> GetProductsByIdList(IEnumerable<int> ids);
         Task<IEnumerable<Product>?> GetFavourites();
         void AddToFavourite(int id);

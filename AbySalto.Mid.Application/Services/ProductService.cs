@@ -33,9 +33,9 @@ namespace AbySalto.Mid.Application.Services
             return await GetFromCacheOrServer<ProductsResponse>(key: "all-product", endpoint: "products?limit=0");
         }
 
-        public async Task<Product?> GetProduct(int id)
+        public async Task<ProductDetails?> GetProduct(int id)
         {
-            return await GetFromCacheOrServer<Product>(key: $"product-{id}", endpoint: $"products/{id}");
+            return await GetFromCacheOrServer<ProductDetails>(key: $"product-{id}", endpoint: $"products/{id}");
         }
 
         public async Task<IEnumerable<Product>> GetProductsByIdList(IEnumerable<int> ids)
@@ -62,7 +62,6 @@ namespace AbySalto.Mid.Application.Services
 
             return await this.cache.GetOrCreateAsync<T>(key, entryValueFactory, cacheOptions);
         }
-
 
         public async Task<IEnumerable<Product>?> GetFavourites()
         {
